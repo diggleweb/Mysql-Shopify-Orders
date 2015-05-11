@@ -1,4 +1,5 @@
-<?     
+<?
+/*
 // Protect URL from rogue attacks/exploits/spiders
 // Grab from GET variable as given in Shopify admin URL
 // for the webhook
@@ -12,6 +13,14 @@
 //
 // If $key doesn't matched what should be passed in from the
 // webhook url, the script simply exits
+*/
+
+// Mysql Config
+$mysql_hostname = "localhost"; // Example : localhost
+$mysql_user = "user";
+$mysql_password = "password";
+$mysql_database = "database";
+
 $key = $_GET['key']; 
 
 if ($key != '123456789') {
@@ -38,26 +47,20 @@ fclose($xmlData);
 // be in the same file
 file_put_contents('orders/order' . date('m-d-y') . '-' . time() . '.xml', $xmlString, FILE_APPEND);
 
-// Use SimpleXML to get name, email, and product titles
-// SimpleXML allows you to use the $xml object to easily
-// retrieve the data ...
-// Please note, if hyphens are used in the xml node, you must
-// surround the call to that member with {'member-name'} as is
-// shown below when getting the billing-address name & the
-// line items
-$xml = new SimpleXMLElement($xmlString);
+// Connect to mysql db and insert
+$dbh = new PDO('mysql:dbname=$mysql_database;host=$mysql_hostname;port=3306', $mysql_user, $mysql_password);
 
-$name = trim($xml->{'billing-address'}->name);
-$email = trim($xml->email);
+$total_price = $doc->firstChild->getElementsByTagName('total-price');
+$total = $total_price->item(0)->nodeValue;
 
-// Create productTitles array with titles from products
-foreach ($xml->{'line-items'}->{'line-item'} as $lineItem) {
-  array_push($productTitles, trim($lineItem->title));
-}
+$email = $doc->firstChild->getElementsByTagName("email");
+$email = $email->item(0)->nodeValue;
 
-// You would then go on using $name, $email, $productTitles in your script
-// to do whatever the heck you please ...
-
+$sql = $dbh->prepare("INSERT INTO shopify_orders (total, email) VALUES (?, ?)");
+   $sql->execute(array(
+     $total,
+     $email
+   ));
 
 // Once you are done doing what you need to do, let Shopify know you have 
 // the data and all is well!
