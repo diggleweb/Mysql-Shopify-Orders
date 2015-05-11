@@ -19,7 +19,9 @@ Installation
 -----------
 
 ```
-Upload mysql-shopify.php to your website and create a webhook for order completion (XML format) and direct it to the url http://example.com/mysql-shopify.php?key=123456789
+0. Edit Mysql Configs
+0. Upload mysql-shopify.php to your website
+0. Create a webhook for order completion (XML format) and direct it to the url http://example.com/mysql-shopify.php?key=123456789
 ```
 
 
