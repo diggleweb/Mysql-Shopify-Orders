@@ -5,8 +5,6 @@ This script will add all Orders completed in shopify to the mysql DB of your cho
 
 My goal for this is to copy orders made om shopify and mirror them to a local mysql DB. To then integrate it with UPS Worldship.
 
-Please see our [contributing guidelines](CONTRIBUTING.md) before reporting an issue.
-
 Shopify Webhook
 -------
 
@@ -19,13 +17,7 @@ Installation
 -----------
 
 ```
-0. Edit Mysql Configs
-0. Upload mysql-shopify.php to your website
-0. Create a webhook for order completion (XML format) and direct it to the url http://example.com/mysql-shopify.php?key=123456789
+1. Edit Mysql Configs
+2. Upload mysql-shopify.php to your website
+3. Create a webhook for order completion (XML format) and direct it to the url http://example.com/mysql-shopify.php?key=123456789
 ```
-
-
-Contributing
-------------
-
-See [Contributing](CONTRIBUTING.md)
