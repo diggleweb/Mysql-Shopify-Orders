@@ -30,41 +30,24 @@ if ($key != '123456789') {
 
 // Variables used for processing/saving
 $xmlString = NULL;  // Used to get data from Shopify into script
-$name = NULL;  // Saves the billing address name to be used for later ...
-$email = NULL;  // Save the email address of the user to be used for later ...
-$productTitles = array();  // Saves all titles of products purchased to be used for later ... 
-$total_price = NULL;
-
-// Get XML data and read it into a string for use with SimpleXML
-// Thanks to David Oxley (http://www.numeriq.co.uk) for help with this
-$xmlData = fopen('php://input' , 'rb'); 
-while (!feof($xmlData)) { $xmlString .= fread($xmlData, 4096); }
-fclose($xmlData);
-
-// Save order XML in file in orders directory
-// This creates a file, write the xml for archival purposes, and closes the file ...
-// If the file already exists, it appends the data ... this should create a separate
-// file for every order but if two orders are processed the same second, they'll both
-// be in the same file
-file_put_contents('orders/order' . date('m-d-y') . '-' . time() . '.xml', $xmlString, FILE_APPEND);
-
 
 $xmlString = file_get_contents('php://input');
 $dom = new DomDocument();
 $dom->loadXML($xmlString);
 
+// prepare mysql connection 
+$dns = "mysql:host=" . $mysql_hostname . ";dbname=" . $mysql_database;
 
 // Connect to mysql db and insert
-$dbh = new PDO('mysql:dbname=external-store;host=localhost;port=3306', $mysql_user, $mysql_password);
+$dbh = new PDO($dns, $mysql_user, $mysql_password);
 
-$thename = $dom->getElementsByTagName("email");
-$email = $thename->item(0)->nodeValue;
+$email = $dom->getElementsByTagName('email')->item(0)->textContent;
 
-$tot = $dom->getElementsByTagName("total-price");
-$total_price = $tot->item(0)->nodeValue;
+$total_price = $dom->getElementsByTagName('total-price')->item(0)->textContent;
 
 
 $order = $dom->getElementsByTagName('shipping-address');
+
 foreach($order as $get){
 
 $address1 = $get->getElementsByTagName('address1')->item(0)->textContent;
@@ -79,7 +62,10 @@ $country = $get->getElementsByTagName('country-code')->item(0)->textContent;
 
 }
 
-$sql = $dbh->prepare("INSERT INTO shopify_orders (order_total, email, address1, address2, city, first_name, last_name, phone, province, zip, country) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+$sql = $dbh->prepare("
+INSERT INTO shopify_orders (order_total, email, address1, address2, city, first_name, last_name, phone, province, zip, country) 
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+");
    $sql->execute(array(
 	$total_price,
 	$email,
